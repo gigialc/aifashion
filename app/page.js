@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import { Search, Sparkles, Heart, HeartCrack } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 
 const priceRanges = [
   { min: 0, max: 50 },
@@ -16,6 +17,18 @@ const ChicChat = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [selectedRange, setSelectedRange] = useState(null);
   const [likes, setLikes] = useState({});
+  const [images, setImages] = useState([]);
+  
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const newImages = files.slice(0, 5 - images.length).map(file => URL.createObjectURL(file));
+    setImages(prev => [...prev, ...newImages].slice(0, 5));
+  };
+
+  const removeImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,70 +51,80 @@ const ChicChat = () => {
       </h1>
         <p className="text-center mb-8 text-gray-600 text-xl">your personal ai stylist</p>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="flex items-center space-x-4">
-            <div className="flex-grow relative">
-              <label htmlFor="pinterest-link" className="block text-sm font-medium text-indigo-700 mb-2">
-                Pinterest Board URL
-              </label>
-              <div className="relative group">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400 group-hover:text-indigo-600 transition-colors duration-200" />
-                <input
-                  id="pinterest-link"
-                  type="url"
-                  placeholder="https://pinterest.com/yourboard"
-                  value={pinterestLink}
-                  onChange={(e) => setPinterestLink(e.target.value)}
-                  className="w-full rounded-full bg-white border-2 border-purple-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 pl-10 pr-4 py-2 text-indigo-900 placeholder-indigo-300 transition-all duration-200 ease-in-out"
-                  required
-                />
-              </div>
-            </div>
-            <div className="flex-shrink-0">
-            <button 
-              type="submit" 
-              disabled={loading}
-              className=" bg-gray-200 hover:from-indigo-700 hover:to-purple-700 text-black rounded-full py-2 px-5 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg disabled:opacity-50 whitespace-nowrap flex items-center"
+
+      <form onSubmit={handleSubmit} className="space-y-3">
+       <div className="flex flex-col items-center space-y-4">
+        <div className="w-full">
+          <label htmlFor="image-upload" className="block text-sm font-medium text-indigo-700 mb-2">
+            Upload Images (Max 5)
+          </label>
+          <div className="flex items-center justify-center w-full">
+            <label
+              htmlFor="image-upload"
+              className="flex flex-col items-center justify-center w-full h-64 border-2 border-indigo-300 border-dashed rounded-lg cursor-pointer bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
             >
-              {loading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2" size={18} />
-                  Discover
-                </>
-              )}
-            </button>
-            </div>
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <Upload className="w-10 h-10 mb-3 text-indigo-500" />
+                <p className="mb-2 text-sm text-indigo-500">
+                  <span className="font-semibold">Click to upload</span> or drag and drop
+                </p>
+                <p className="text-xs text-indigo-500">PNG, JPG or GIF (MAX. 5 images)</p>
+              </div>
+              <input
+                id="image-upload"
+                type="file"
+                className="hidden"
+                onChange={handleImageUpload}
+                accept="image/*"
+                multiple
+                disabled={images.length >= 5}
+              />
+            </label>
           </div>
-          
-          <div>
-            {/* <label className="block text-sm font-medium text-indigo-700 mb-3">Price Range</label> */}
-            <div className="flex flex-wrap gap-2 justify-left mb-10">
-              {priceRanges.map((range, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => setSelectedRange(index)}
-                  className={`px-4 py-1 rounded-full text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105 ${
-                    selectedRange === index
-                      ? 'bg-black text-white shadow-md'
-                      : 'bg-white text-purple-700 border border-purple-400 hover:border-indigo-400 hover:bg-pink'
-                  }`}
-                >
-                  ${range.min} - ${range.max}
-                </button>
-              ))}
-            </div>
-          </div>
-        </form>
         </div>
+        
+        {images.length > 0 && (
+          <div className="flex flex-wrap gap-4 justify-center">
+            {images.map((image, index) => (
+              <div key={index} className="relative">
+                <img src={image} alt={`Uploaded ${index + 1}`} className="w-24 h-24 object-cover rounded-lg" />
+                <button
+                  type="button"
+                  onClick={() => removeImage(index)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors duration-200"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        <button 
+          type="submit" 
+          disabled={loading || images.length === 0}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full py-2 px-5 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex items-center"
+        >
+          {loading ? (
+            <>
+              <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Uploading...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2" size={18} />
+              Upload Images
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+        
+        
+    </div>
 
         {suggestions.length > 0 && (
         <div className="max-w-4xl mx-auto mt-8 rounded-3xl p-8">

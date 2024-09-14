@@ -1,11 +1,21 @@
 "use client"
 import React, { useState } from 'react';
+import { Search, Sparkles, Heart, HeartCrack } from 'lucide-react';
+
+const priceRanges = [
+  { min: 0, max: 50 },
+  { min: 50, max: 100 },
+  { min: 100, max: 250 },
+  { min: 250, max: 350 },
+];
 
 const ChicChat = () => {
   const [pinterestLink, setPinterestLink] = useState('');
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
+  const [selectedRange, setSelectedRange] = useState(null);
+  const [likes, setLikes] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,66 +31,80 @@ const ChicChat = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] to-[#E6E6FA] p-8 font-sans">
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat p-8 font-sans" style={{backgroundImage: "url('/chicai.png')"}}>
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-6xl font-extrabold text-center mb-2 text-[#8A2BE2] tracking-tight">ChicChat</h1>
-        <p className="text-center mb-12 text-[#4B0082] text-xl">Discover your sustainable style</p>
-        
-        <div className="bg-white/80 backdrop-blur-md shadow-xl rounded-3xl overflow-hidden mb-12 p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label htmlFor="pinterest-link" className="block text-sm font-medium text-[#4B0082]">Pinterest Board URL</label>
-              <input
-                id="pinterest-link"
-                type="url"
-                placeholder="https://pinterest.com/yourboard"
-                value={pinterestLink}
-                onChange={(e) => setPinterestLink(e.target.value)}
-                className="w-full rounded-full border-2 border-[#E6E6FA] focus:border-[#8A2BE2] focus:outline-none px-4 py-2"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-[#4B0082]">Price Range: ${priceRange[0]} - ${priceRange[1]}</label>
-              <input
-                type="range"
-                min="0"
-                max="1000"
-                step="10"
-                value={priceRange[1]}
-                onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                className="w-full"
-              />
-            </div>
+        <h1 className="text-6xl text-center mb-2 text-black tracking-tight font-serif leading-tight transform scale-105 transition-all duration-500 hover:text-gray-800">
+        ChicAI
+      </h1>
+        <p className="text-center mb-8 text-gray-600 text-xl">your personal ai stylist</p>
 
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="flex items-center space-x-4">
+            <div className="flex-grow relative">
+              <label htmlFor="pinterest-link" className="block text-sm font-medium text-indigo-700 mb-2">
+                Pinterest Board URL
+              </label>
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400 group-hover:text-indigo-600 transition-colors duration-200" />
+                <input
+                  id="pinterest-link"
+                  type="url"
+                  placeholder="https://pinterest.com/yourboard"
+                  value={pinterestLink}
+                  onChange={(e) => setPinterestLink(e.target.value)}
+                  className="w-full rounded-full bg-white border-2 border-purple-200 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 pl-10 pr-4 py-2 text-indigo-900 placeholder-indigo-300 transition-all duration-200 ease-in-out"
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex-shrink-0">
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#9370DB] to-[#8A2BE2] hover:from-[#8A2BE2] hover:to-[#9370DB] text-white rounded-full py-3 px-4 transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50"
+              className=" bg-gray-200 hover:from-indigo-700 hover:to-purple-700 text-black rounded-full py-2 px-5 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg disabled:opacity-50 whitespace-nowrap flex items-center"
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin h-5 w-5 mr-3 inline-block" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Analyzing your style...
+                  Analyzing...
                 </>
               ) : (
                 <>
-                  {/* <svg className="inline-block mr-2 h-5 w-5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                    <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                    <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg> */}
-                  Find My Style
+                  <Sparkles className="mr-2" size={18} />
+                  Discover
                 </>
               )}
             </button>
-          </form>
+            </div>
+          </div>
+          
+          <div>
+            {/* <label className="block text-sm font-medium text-indigo-700 mb-3">Price Range</label> */}
+            <div className="flex flex-wrap gap-2 justify-left mb-10">
+              {priceRanges.map((range, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setSelectedRange(index)}
+                  className={`px-4 py-1 rounded-full text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105 ${
+                    selectedRange === index
+                      ? 'bg-black text-white shadow-md'
+                      : 'bg-white text-purple-700 border border-purple-400 hover:border-indigo-400 hover:bg-pink'
+                  }`}
+                >
+                  ${range.min} - ${range.max}
+                </button>
+              ))}
+            </div>
+          </div>
+        </form>
         </div>
 
         {suggestions.length > 0 && (
+        <div className="max-w-4xl mx-auto mt-8 rounded-3xl p-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {suggestions.map((item) => (
               <div key={item.id} className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
@@ -95,13 +119,27 @@ const ChicChat = () => {
                 </div>
                 <div className="p-4">
                   <h3 className="font-semibold text-lg mb-2 text-[#4B0082]">{item.name}</h3>
-                  <p className="text-sm text-[#9370DB]">Sustainable Choice</p>
+                  <p className="text-sm text-[#9370DB] mb-4">Sustainable Choice</p>
+                  <div className="flex justify-between items-center">
+                    <button 
+                      onClick={() => handleLike(item.id, true)}
+                      className={`p-2 rounded-full transition-colors duration-200 ${likes[item.id] === true ? 'bg-pink-100 text-pink-500' : 'hover:bg-pink-50 text-gray-400'}`}
+                    >
+                      <Heart size={24} fill={likes[item.id] === true ? 'currentColor' : 'none'} />
+                    </button>
+                    <button 
+                      onClick={() => handleLike(item.id, false)}
+                      className={`p-2 rounded-full transition-colors duration-200 ${likes[item.id] === false ? 'bg-gray-100 text-gray-500' : 'hover:bg-gray-50 text-gray-400'}`}
+                    >
+                      <HeartCrack size={24} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

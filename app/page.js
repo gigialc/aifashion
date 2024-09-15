@@ -36,6 +36,11 @@ const ChicChat = () => {
       // fetching pinterest board pictures from board link
       const boardData = await fetchPinterestData(link);
 
+      console.log('All pins:', boardData);
+
+
+      
+
       if (!boardData.jsonld || !boardData.jsonld.itemListElement || boardData.jsonld.itemListElement.length === 0) {
         console.log('No pins found in the board.');
         setLoading(false);

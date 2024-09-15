@@ -1,22 +1,18 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Sparkles, Heart, HeartCrack, Link as LinkIcon } from "lucide-react";
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../convex/_generated/api";
-import { getMatchedItems, updateMatchedItems } from "../convex/items";
-import { fetchPinterestData } from "../serper/api";
+import { api } from "../convex/_generated/api"; // Make sure the path is correct for your project setup
 
 const ChicChat = () => {
   const [loading, setLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
-  const [likes, setLikes] = useState({});
   const [link, setLink] = useState("");
-  const [responseData, setResponseData] = useState(null);
-  const fetchMatchedItems = useQuery(api.items.getMatchedItems);
-  const mutateMatchedItems = useMutation(api.items.updateMatchedItems);
+  const updateMatchedItems = useMutation(api.items.updateMatchedItems);  // Mutation to update items
+  const getMatchedItems = useQuery(api.items.getMatchedItems);  // Query to get matched items
+  const fetchMatchedItems = useQuery(api.items.getMatchedItems);  // Fetch matched items from Convex
+  const mutateMatchedItems = useMutation(api.items.updateMatchedItems); // Mutation to update matched items in Convex
   const [matchedItems, setMatchedItems] = useState([]);
   const [items, setItems] = useState([]);
-  
 
   const handleLinkChange = (value) => {
     setLink(value);
@@ -31,47 +27,16 @@ const ChicChat = () => {
       setLoading(false);
       return;
     }
-    const linksToPinImages = ["https://i.pinimg.com/564x/66/c5/2b/66c52bcb458b467fec50806ba466dbdf.jpg", "https://i.pinimg.com/736x/98/09/60/9809609693aea98c987ae6767a071b6f.jpg", "https://i.pinimg.com/564x/a1/bc/26/a1bc26115bf0dc9278a9ce7a36936278.jpg", "https://i.pinimg.com/736x/7a/2f/fb/7a2ffb71ede2705f27bfc0ea9643c8c0.jpg", "https://i.pinimg.com/564x/6c/5f/eb/6c5febe4049c4597d70b1cb286aa9cde.jpg"];
+
+    const linksToPinImages = [
+      "https://i.pinimg.com/564x/66/c5/2b/66c52bcb458b467fec50806ba466dbdf.jpg",
+      "https://i.pinimg.com/736x/98/09/60/9809609693aea98c987ae6767a071b6f.jpg",
+      "https://i.pinimg.com/564x/a1/bc/26/a1bc26115bf0dc9278a9ce7a36936278.jpg",
+      "https://i.pinimg.com/736x/7a/2f/fb/7a2ffb71ede2705f27bfc0ea9643c8c0.jpg",
+      "https://i.pinimg.com/564x/6c/5f/eb/6c5febe4049c4597d70b1cb286aa9cde.jpg"
+    ];
+
     try {
-      // // Fetching Pinterest board pictures from board link
-      // const boardData = await fetchPinterestData(link);
-
-      // console.log('All pins:', boardData);
-
-
-      
-
-      // if (!boardData.jsonld || !boardData.jsonld.itemListElement || boardData.jsonld.itemListElement.length === 0) {
-      //   console.log("No pins found in the board.");
-      //   setLoading(false);
-      //   return;
-      // }
-
-      // const pinUrls = boardData.jsonld.itemListElement.map((pin) => pin.url);
-      // console.log("Pin URLs:", pinUrls);
-
-      // const allPinImages = [];
-
-      // // Fetch from each pin URL
-      // for (const url of pinUrls) {
-      //   try {
-      //     const pinData = await fetchPinterestData(url); // Fetching individual pin data
-
-      //     const ogImage = pinData.metadata?.["og:image"];
-
-      //     if (ogImage) {
-      //       allPinImages.push({ url, ogImage });
-      //     } else {
-      //       console.log(`No 'og:image' found for pin: ${url}`);
-      //     }
-      //   } catch (error) {
-      //     console.error(`Error fetching data for pin: ${url}`, error);
-      //   }
-      // }
-
-      // console.log("All Pin Images:", allPinImages);
-
-      // Loop through all images and send them to the Tune API
       for (const pin of linksToPinImages) {
         const response = await fetch("https://proxy.tune.app/chat/completions", {
           method: "POST",
@@ -112,7 +77,7 @@ const ChicChat = () => {
                   {
                     type: "image_url",
                     image_url: {
-                      url: pin.ogImage,
+                      url: pin, // Using the current Pinterest image
                     },
                   },
                 ],
@@ -135,20 +100,30 @@ const ChicChat = () => {
         const result = await response.json();
         console.log("API Response for Image:", result);
 
-        setResponseData(result);
+        // Parse characteristics from the API response
+        const characteristics = result.choices[0].message.content
+          .split(",")
+          .map((item) => item.trim());
 
-        // Parse the characteristics from the API response
-        const characteristics = result.choices[0].message.content.split(",").map((item) => item.trim());
+        console.log("Parsed Characteristics:", characteristics);
 
-        // Update the matched items in the database
+        if (characteristics.length === 0) {
+          console.error("Characteristics are empty.");
+          throw new Error("Failed to extract characteristics from the API response.");
+        }
+
+        // Update the matched items in the Convex database
         await updateMatchedItems({ characteristics });
 
-        // Fetch the updated matched items
-        const items = await getMatchedItems();
-        setMatchedItems(items);
+        // Fetch the updated matched items from Convex
+        const updatedItems = await updateMatchedItems({ characteristics });
+        console.log("Updated Items from Backend:", updatedItems);  // Add this to see the result
+
+        // Set the updated matched items
+        setMatchedItems(updatedItems);
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching or processing data:", error);
       alert(`An error occurred: ${error.message}`);
     }
 
@@ -162,7 +137,7 @@ const ChicChat = () => {
     >
       <div className="max-w-4xl mx-auto">
         <h1 className="text-6xl text-center mb-2 text-black tracking-tight font-serif leading-tight transform scale-105 transition-all duration-500 hover:text-gray-800">
-         MyAIStylist
+          MyAIStylist
         </h1>
         <p className="text-center mb-8 text-gray-600 text-xl">your personal ai stylist</p>
 
@@ -238,3 +213,4 @@ const ChicChat = () => {
 };
 
 export default ChicChat;
+

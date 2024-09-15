@@ -3,12 +3,14 @@ import React, { useState } from 'react';
 import { Search, Sparkles, Heart, HeartCrack, Link as LinkIcon } from 'lucide-react';
 import { useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
+import { fetchPinterestData } from '../serper/api';
 
 const ChicChat = () => {
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [likes, setLikes] = useState({});
   const [link, setLink] = useState('');
+  //const [boardData, setBoardData] = useState(null);
   const [responseData, setResponseData] = useState(null);
 
   const handleLinkChange = (value) => {
@@ -26,6 +28,43 @@ const ChicChat = () => {
     }
 
     try {
+      // fetching pinterest board pictures from board link
+      const boardData = await fetchPinterestData(link);
+
+      if (!boardData.jsonld || !boardData.jsonld.itemListElement || boardData.jsonld.itemListElement.length === 0) {
+        console.log('No pins found in the board.');
+        setLoading(false);
+        return;
+      }
+
+
+    const pinUrls = boardData.jsonld.itemListElement.map(pin => pin.url);
+    console.log('Pin URLs:', pinUrls);
+
+    const allPinImages = [];
+
+
+      // fetch from each pin url
+      for (const url of pinUrls) {
+        try {
+          const pinData = await fetchPinterestData(url);  // Fetching individual pin data
+
+          const ogImage = pinData.metadata?.['og:image'];
+  
+          if (ogImage) {
+            allPinImages.push({ url, ogImage });
+          } else {
+            console.log(`No 'og:image' found for pin: ${url}`);
+          }
+  
+        } catch (error) {
+          console.error(`Error fetching data for pin: ${url}`, error);
+        }
+      }
+  
+      console.log('All Pin Images:', allPinImages);
+
+
       const response = await fetch("https://proxy.tune.app/chat/completions", {
         method: "POST",
         headers: {

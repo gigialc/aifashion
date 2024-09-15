@@ -5,38 +5,75 @@ import { Upload, X } from 'lucide-react';
 import { useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 
-const priceRanges = [
-  { min: 0, max: 50 },
-  { min: 50, max: 100 },
-  { min: 100, max: 250 },
-  { min: 250, max: 350 },
-];
+// const priceRanges = [
+//   { min: 0, max: 50 },
+//   { min: 50, max: 100 },
+//   { min: 100, max: 250 },
+//   { min: 250, max: 350 },
+// ];
 
 const ChicChat = () => {
+<<<<<<< Updated upstream
   const tasks = useQuery(api.tasks.get);
   const [pinterestLink, setPinterestLink] = useState('');
   const [priceRange, setPriceRange] = useState([0, 1000]);
+=======
+>>>>>>> Stashed changes
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
-  const [selectedRange, setSelectedRange] = useState(null);
   const [likes, setLikes] = useState({});
   const [images, setImages] = useState([]);
-  
+  const [base64Images, setBase64Images] = useState([]);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.slice(0, 5 - images.length).map(file => URL.createObjectURL(file));
-    setImages(prev => [...prev, ...newImages].slice(0, 5));
+    
+    if (files.length === 0) {
+      console.log('No files selected');
+      return;
+    }
+  
+    const newFiles = files.slice(0, 5 - images.length);
+  
+    newFiles.forEach(file => {
+      const reader = new FileReader();
+      
+      reader.onloadend = () => {
+        const base64String = reader.result;
+        
+        if (base64String) {
+          setBase64Images(prev => [...prev, base64String].slice(0, 5));
+          setImages(prev => [...prev, base64String].slice(0, 5));
+        } else {
+          console.log('Error: Base64 conversion failed');
+        }
+      };
+  
+      reader.onerror = () => {
+        console.log('Error reading file:', reader.error);
+      };
+  
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const getDataUrl = (base64String) => {
+    if (base64String.startsWith('data:image')) {
+      return base64String;
+    }
+    return `data:image/jpeg;base64,${base64String}`;
   };
 
   const removeImage = (index) => {
     setImages(prev => prev.filter((_, i) => i !== index));
+    setBase64Images(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Simulating API call
+    console.log("Base64 Images:", base64Images);
+
     await new Promise(resolve => setTimeout(resolve, 2000));
     setSuggestions([
       { id: 1, name: 'Eco-friendly T-shirt', price: 29.99, image: '/api/placeholder/300/400' },
@@ -54,85 +91,82 @@ const ChicChat = () => {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-6xl text-center mb-2 text-black tracking-tight font-serif leading-tight transform scale-105 transition-all duration-500 hover:text-gray-800">
           fashion
-      </h1>
+        </h1>
         <p className="text-center mb-8 text-gray-600 text-xl">your personal ai stylist</p>
 
-
-      <form onSubmit={handleSubmit} className="space-y-3">
-       <div className="flex flex-col items-center space-y-4">
-        <div className="w-full">
-          <label htmlFor="image-upload" className="block text-sm font-medium text-indigo-700 mb-2">
-            Upload Images (Max 5)
-          </label>
-          <div className="flex items-center justify-center w-full">
-            <label
-              htmlFor="image-upload"
-              className="flex flex-col items-center justify-center w-full h-64 border-2 border-indigo-300 border-dashed rounded-lg cursor-pointer bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
-            >
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <Upload className="w-10 h-10 mb-3 text-indigo-500" />
-                <p className="mb-2 text-sm text-indigo-500">
-                  <span className="font-semibold">Click to upload</span> or drag and drop
-                </p>
-                <p className="text-xs text-indigo-500">PNG, JPG or GIF (MAX. 5 images)</p>
-              </div>
-              <input
-                id="image-upload"
-                type="file"
-                className="hidden"
-                onChange={handleImageUpload}
-                accept="image/*"
-                multiple
-                disabled={images.length >= 5}
-              />
-            </label>
-          </div>
-        </div>
-        
-        {images.length > 0 && (
-          <div className="flex flex-wrap gap-4 justify-center">
-            {images.map((image, index) => (
-              <div key={index} className="relative">
-                <img src={image} alt={`Uploaded ${index + 1}`} className="w-24 h-24 object-cover rounded-lg" />
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors duration-200"
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-full">
+              <label htmlFor="image-upload" className="block text-sm font-medium text-indigo-700 mb-2">
+                Upload Images (Max 5)
+              </label>
+              <div className="flex items-center justify-center w-full">
+                <label
+                  htmlFor="image-upload"
+                  className="flex flex-col items-center justify-center w-full h-64 border-2 border-indigo-300 border-dashed rounded-lg cursor-pointer bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
                 >
-                  <X size={16} />
-                </button>
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload className="w-10 h-10 mb-3 text-indigo-500" />
+                    <p className="mb-2 text-sm text-indigo-500">
+                      <span className="font-semibold">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-indigo-500">PNG, JPG or GIF (MAX. 5 images)</p>
+                  </div>
+                  <input
+                    id="image-upload"
+                    type="file"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    multiple
+                    disabled={images.length >= 5}
+                  />
+                </label>
               </div>
-            ))}
+            </div>
+            
+            {images.length > 0 && (
+              <div className="flex flex-wrap gap-4 justify-center">
+                {images.map((image, index) => (
+                  <div key={index} className="relative">
+                    <img src={getDataUrl(image)} alt={`Uploaded ${index + 1}`} className="w-24 h-24 object-cover rounded-lg" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors duration-200"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <button 
+              type="submit" 
+              disabled={loading || images.length === 0}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full py-2 px-5 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex items-center"
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2" size={18} />
+                  Upload Images
+                </>
+              )}
+            </button>
           </div>
-        )}
-        
-        <button 
-          type="submit" 
-          disabled={loading || images.length === 0}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full py-2 px-5 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex items-center"
-        >
-          {loading ? (
-            <>
-              <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Upload className="mr-2" size={18} />
-              Upload Images
-            </>
-          )}
-        </button>
+        </form>
       </div>
-    </form>
-        
-        
-    </div>
 
-        {suggestions.length > 0 && (
+      {suggestions.length > 0 && (
         <div className="max-w-4xl mx-auto mt-8 rounded-3xl p-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {suggestions.map((item) => (

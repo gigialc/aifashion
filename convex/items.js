@@ -4,7 +4,7 @@ import { v } from "convex/values";
 export const getMatchedItems = query({
   args: {},
   handler: async (ctx) => {
-    const items = await ctx.db.query("items").collect();
+    const items = await ctx.db.query("products").collect();
     return items;
   },
 });
@@ -12,7 +12,7 @@ export const getMatchedItems = query({
 export const updateMatchedItems = mutation({
   args: { characteristics: v.array(v.string()) },
   handler: async (ctx, { characteristics }) => {
-    const items = await ctx.db.query("items").collect();
+    const items = await ctx.db.query("products").collect();
     
     // Calculate matching score for each item
     const scoredItems = items.map(item => {

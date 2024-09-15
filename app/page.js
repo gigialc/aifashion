@@ -33,43 +33,43 @@ const ChicChat = () => {
     }
     const linksToPinImages = ["https://i.pinimg.com/564x/66/c5/2b/66c52bcb458b467fec50806ba466dbdf.jpg", "https://i.pinimg.com/736x/98/09/60/9809609693aea98c987ae6767a071b6f.jpg", "https://i.pinimg.com/564x/a1/bc/26/a1bc26115bf0dc9278a9ce7a36936278.jpg", "https://i.pinimg.com/736x/7a/2f/fb/7a2ffb71ede2705f27bfc0ea9643c8c0.jpg", "https://i.pinimg.com/564x/6c/5f/eb/6c5febe4049c4597d70b1cb286aa9cde.jpg"];
     try {
-      // Fetching Pinterest board pictures from board link
-      const boardData = await fetchPinterestData(link);
+      // // Fetching Pinterest board pictures from board link
+      // const boardData = await fetchPinterestData(link);
 
-      console.log('All pins:', boardData);
+      // console.log('All pins:', boardData);
 
 
       
 
-      if (!boardData.jsonld || !boardData.jsonld.itemListElement || boardData.jsonld.itemListElement.length === 0) {
-        console.log("No pins found in the board.");
-        setLoading(false);
-        return;
-      }
+      // if (!boardData.jsonld || !boardData.jsonld.itemListElement || boardData.jsonld.itemListElement.length === 0) {
+      //   console.log("No pins found in the board.");
+      //   setLoading(false);
+      //   return;
+      // }
 
-      const pinUrls = boardData.jsonld.itemListElement.map((pin) => pin.url);
-      console.log("Pin URLs:", pinUrls);
+      // const pinUrls = boardData.jsonld.itemListElement.map((pin) => pin.url);
+      // console.log("Pin URLs:", pinUrls);
 
-      const allPinImages = [];
+      // const allPinImages = [];
 
-      // Fetch from each pin URL
-      for (const url of pinUrls) {
-        try {
-          const pinData = await fetchPinterestData(url); // Fetching individual pin data
+      // // Fetch from each pin URL
+      // for (const url of pinUrls) {
+      //   try {
+      //     const pinData = await fetchPinterestData(url); // Fetching individual pin data
 
-          const ogImage = pinData.metadata?.["og:image"];
+      //     const ogImage = pinData.metadata?.["og:image"];
 
-          if (ogImage) {
-            allPinImages.push({ url, ogImage });
-          } else {
-            console.log(`No 'og:image' found for pin: ${url}`);
-          }
-        } catch (error) {
-          console.error(`Error fetching data for pin: ${url}`, error);
-        }
-      }
+      //     if (ogImage) {
+      //       allPinImages.push({ url, ogImage });
+      //     } else {
+      //       console.log(`No 'og:image' found for pin: ${url}`);
+      //     }
+      //   } catch (error) {
+      //     console.error(`Error fetching data for pin: ${url}`, error);
+      //   }
+      // }
 
-      console.log("All Pin Images:", allPinImages);
+      // console.log("All Pin Images:", allPinImages);
 
       // Loop through all images and send them to the Tune API
       for (const pin of linksToPinImages) {
@@ -77,7 +77,7 @@ const ChicChat = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "sk-tune-qw1eeqoeEQ6CmbgPLr29JckQQbFVwwTahxH", // Replace with your actual API key
+            Authorization: "sk-tune-yzCvXBG9HLSKZtDkBaCAM1PUTtywr66Picy", // Replace with your actual API key
           },
           body: JSON.stringify({
             temperature: 0.9,

@@ -1,8 +1,9 @@
 "use client"
 import React, { useState } from 'react';
 import { Search, Sparkles, Heart, HeartCrack, Link as LinkIcon } from 'lucide-react';
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
+import { getMatchedItems, updateMatchedItems } from "../convex/items"; 
 
 const ChicChat = () => {
   const [loading, setLoading] = useState(false);
@@ -10,6 +11,10 @@ const ChicChat = () => {
   const [likes, setLikes] = useState({});
   const [link, setLink] = useState('');
   const [responseData, setResponseData] = useState(null);
+  const fetchMatchedItems = useQuery(api.items.getMatchedItems);
+  const mutateMatchedItems = useMutation(api.items.updateMatchedItems);
+  const [matchedItems, setMatchedItems] = useState([]);
+  const [items, setItems] = useState([]);
 
   const handleLinkChange = (value) => {
     setLink(value);
@@ -42,7 +47,7 @@ const ChicChat = () => {
             },
             {
               role: "user",
-              content: `Please identify 2 characteristics from each of the 8 categories below that the picture can best be described by. List the response with only the answers separated by commas.
+              content: `Imagine you are a stylist. Please identify 2 characteristics from each of the 8 categories below that the picture can best be described by. List the response with only the answers and each answer separated by commas.
 
               1. Color
               Red, Blue, Green, Yellow, Pink, Black, White, Gray, Beige, Burgundy, Navy, Emerald, Teal, Lavender, Coral, Mint, Mustard, Pastel, Neon, Metallic
@@ -89,11 +94,20 @@ const ChicChat = () => {
       console.log("API Response:", result);
 
       setResponseData(result);
-      setSuggestions([
-        { id: 1, name: 'Eco-friendly T-shirt', price: 29.99, image: '/api/placeholder/300/400' },
-        { id: 2, name: 'Recycled Jeans', price: 79.99, image: '/api/placeholder/300/400' },
-        { id: 3, name: 'Organic Cotton Dress', price: 89.99, image: '/api/placeholder/300/400' },
-      ]);
+
+      // Parse the characteristics from the API response
+     
+      // Parse the characteristics from the API response
+      const characteristics = result.choices[0].message.content.split(',').map(item => item.trim());
+
+      // Update the matched items in the database
+      await updateMatchedItems({ characteristics });
+
+      // Fetch the updated matched items
+      const items = await getMatchedItems(); // Ensure this is correctly imported
+      setMatchedItems(items);
+
+    
     } catch (error) {
       console.error("Error fetching data:", error);
       alert(`An error occurred: ${error.message}`);
@@ -150,37 +164,19 @@ const ChicChat = () => {
         </form>
       </div>
 
-      {suggestions.length > 0 && (
+
+      {matchedItems && matchedItems.length > 0 && (
         <div className="max-w-4xl mx-auto mt-8 rounded-3xl p-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {suggestions.map((item) => (
-              <div key={item.id} className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+            {matchedItems.map((item) => (
+              <div key={item._id} className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
                 <div className="relative">
-                  <img src={item.image} alt={item.name} className="w-full h-64 object-cover" />
-                  {/* <div className="absolute top-0 right-0 bg-[#8A2BE2] text-white px-3 py-1 rounded-bl-lg">
-                    <svg className="inline-block h-4 w-4 mr-1" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                      <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    {item.price.toFixed(2)}
-                  </div> */}
+                  <img src={item.imageUrl} alt={item.title} className="w-full h-64 object-cover" />
                 </div>
                 <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2 text-[#4B0082]">{item.name}</h3>
-                  <p className="text-sm text-[#9370DB] mb-4">Sustainable Choice</p>
-                  {/* <div className="flex justify-between items-center">
-                    <button 
-                      onClick={() => handleLike(item.id, true)}
-                      className={`p-2 rounded-full transition-colors duration-200 ${likes[item.id] === true ? 'bg-pink-100 text-pink-500' : 'hover:bg-pink-50 text-gray-400'}`}
-                    >
-                      <Heart size={24} fill={likes[item.id] === true ? 'currentColor' : 'none'} />
-                    </button>
-                    <button 
-                      onClick={() => handleLike(item.id, false)}
-                      className={`p-2 rounded-full transition-colors duration-200 ${likes[item.id] === false ? 'bg-gray-100 text-gray-500' : 'hover:bg-gray-50 text-gray-400'}`}
-                    >
-                      <HeartCrack size={24} />
-                    </button>
-                  </div> */}
+                  <h3 className="font-semibold text-lg mb-2 text-[#4B0082]">{item.title}</h3>
+                  <p className="text-sm text-[#9370DB] mb-4">{item.source}</p>
+                  <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Item</a>
                 </div>
               </div>
             ))}

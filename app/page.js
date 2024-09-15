@@ -13,12 +13,9 @@ import { api } from "../convex/_generated/api";
 // ];
 
 const ChicChat = () => {
-<<<<<<< Updated upstream
   const tasks = useQuery(api.tasks.get);
   const [pinterestLink, setPinterestLink] = useState('');
   const [priceRange, setPriceRange] = useState([0, 1000]);
-=======
->>>>>>> Stashed changes
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [likes, setLikes] = useState({});

@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Search, Sparkles, Heart, HeartCrack } from 'lucide-react';
 import { Upload, X } from 'lucide-react';
+import { useQuery } from "convex/react";
+import { api } from "../convex/_generated/api";
 
 const priceRanges = [
   { min: 0, max: 50 },
@@ -11,6 +13,7 @@ const priceRanges = [
 ];
 
 const ChicChat = () => {
+  const tasks = useQuery(api.tasks.get);
   const [pinterestLink, setPinterestLink] = useState('');
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [loading, setLoading] = useState(false);
@@ -44,6 +47,9 @@ const ChicChat = () => {
   };
 
   return (
+      // {tasks?.map(({ _id, text }) => (
+      //   <div key={_id}>{text}</div>
+      // ))}
     <div className="min-h-screen bg-cover bg-center bg-no-repeat p-8 font-sans" style={{backgroundImage: "url('/hackmnit.jpg')"}}>
       <div className="max-w-4xl mx-auto">
         <h1 className="text-6xl text-center mb-2 text-black tracking-tight font-serif leading-tight transform scale-105 transition-all duration-500 hover:text-gray-800">

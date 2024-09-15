@@ -42,7 +42,7 @@ const ChicChat = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "sk-tune-yzCvXBG9HLSKZtDkBaCAM1PUTtywr66Picy", // Replace with your actual API key
+            Authorization: "place your API key here lol", // Replace with your actual API key
           },
           body: JSON.stringify({
             temperature: 0.9,

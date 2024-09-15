@@ -1,89 +1,108 @@
 "use client"
 import React, { useState } from 'react';
-import { Search, Sparkles, Heart, HeartCrack } from 'lucide-react';
-import { Upload, X } from 'lucide-react';
+import { Search, Sparkles, Heart, HeartCrack, Link as LinkIcon } from 'lucide-react';
 import { useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 
-// const priceRanges = [
-//   { min: 0, max: 50 },
-//   { min: 50, max: 100 },
-//   { min: 100, max: 250 },
-//   { min: 250, max: 350 },
-// ];
-
 const ChicChat = () => {
-  const tasks = useQuery(api.tasks.get);
-  const [pinterestLink, setPinterestLink] = useState('');
-  const [priceRange, setPriceRange] = useState([0, 1000]);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [likes, setLikes] = useState({});
-  const [images, setImages] = useState([]);
-  const [base64Images, setBase64Images] = useState([]);
+  const [link, setLink] = useState('');
+  const [responseData, setResponseData] = useState(null);
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    
-    if (files.length === 0) {
-      console.log('No files selected');
-      return;
-    }
-  
-    const newFiles = files.slice(0, 5 - images.length);
-  
-    newFiles.forEach(file => {
-      const reader = new FileReader();
-      
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        
-        if (base64String) {
-          setBase64Images(prev => [...prev, base64String].slice(0, 5));
-          setImages(prev => [...prev, base64String].slice(0, 5));
-        } else {
-          console.log('Error: Base64 conversion failed');
-        }
-      };
-  
-      reader.onerror = () => {
-        console.log('Error reading file:', reader.error);
-      };
-  
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const getDataUrl = (base64String) => {
-    if (base64String.startsWith('data:image')) {
-      return base64String;
-    }
-    return `data:image/jpeg;base64,${base64String}`;
-  };
-
-  const removeImage = (index) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-    setBase64Images(prev => prev.filter((_, i) => i !== index));
+  const handleLinkChange = (value) => {
+    setLink(value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log("Base64 Images:", base64Images);
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setSuggestions([
-      { id: 1, name: 'Eco-friendly T-shirt', price: 29.99, image: '/api/placeholder/300/400' },
-      { id: 2, name: 'Recycled Jeans', price: 79.99, image: '/api/placeholder/300/400' },
-      { id: 3, name: 'Organic Cotton Dress', price: 89.99, image: '/api/placeholder/300/400' },
-    ]);
+    if (link.trim() === '') {
+      console.log('No valid link provided.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("https://proxy.tune.app/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "sk-tune-qw1eeqoeEQ6CmbgPLr29JckQQbFVwwTahxH", // Replace with your actual API key
+        },
+        body: JSON.stringify({
+          images: [link],
+          temperature: 0.9,
+          messages: [
+            {
+              role: "system",
+              content: "You are TuneStudio"
+            },
+            {
+              role: "user",
+              content: `Please identify 2 characteristics from each of the 8 categories below that the picture can best be described by. List the response with only the answers separated by commas.
+
+              1. Color
+              Red, Blue, Green, Yellow, Pink, Black, White, Gray, Beige, Burgundy, Navy, Emerald, Teal, Lavender, Coral, Mint, Mustard, Pastel, Neon, Metallic
+              
+              2. Texture
+              Smooth, Rough, Silky, Suede, Velvet, Glossy, Matte, Satin, Corduroy, Wool, Denim, Crochet, Embossed, Quilted, Ribbed, Sequin, Pleated, Knit, Sheer, Faux fur
+              
+              3. Vibe
+              Casual, Formal, Bohemian, Edgy, Preppy, Vintage, Sporty, Minimalist, Glamorous, Retro, Streetwear, Grunge, Punk, Business, Resort, Cottagecore, Urban, Futuristic, Hippie, Avant-garde
+              
+              4. Shape
+              Boxy, Fitted, A-line, Bodycon, Oversized, Slim-fit, Cropped, Flared, Asymmetric, Tailored, Balloon, Draped, Peplum, Straight, Wrap, Trapeze, Mermaid, Pencil, Tiered, Shift
+              
+              5. Pattern
+              Stripes, Polka dots, Floral, Animal print, Geometric, Plaid, Houndstooth, Paisley, Tie-dye, Camouflage, Chevron, Gingham, Argyle, Ikat, Abstract, Damask, Pinstripe, Baroque, Ombre, Brocade
+              
+              6. Occasion
+              Wedding, Party, Cocktail, Casual outing, Workwear, Beachwear, Gym, Travel, Brunch, Evening, Festival, Formal event, Dinner date, Holiday, Graduation, Prom, Business meeting, Weekend, Red carpet, Baby shower
+              
+              7. Style Era
+              1920s, 1930s, 1940s, 1950s, 1960s, 1970s, 1980s, 1990s, Y2K, Contemporary, Futuristic, Renaissance, Victorian, Gothic, Regency, Mid-century, Retro-futurism, Disco, New Wave
+              
+              8. Season
+              Spring, Summer, Fall, Winter, Transitional, Resort, Holiday, Pre-fall, Cruise, Festival season, Monsoon, Spring/summer, Fall/winter, Back-to-school, Ski season, Beach season, Autumnal, Rainy season, New Year's Eve, Valentine's Day
+              
+              Here is the image link: ${link}`,
+            },
+          ],
+          model: "rohan/tune-gpt-4o",
+          stream: false,
+          frequency_penalty: 0.2,
+          max_tokens: 1000,
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("API Response Error:", error);
+        alert(`Error: ${error.error.message}`);
+        throw new Error(`API error: ${error.error.message}`);
+      }
+
+      const result = await response.json();
+      console.log("API Response:", result);
+
+      setResponseData(result);
+      setSuggestions([
+        { id: 1, name: 'Eco-friendly T-shirt', price: 29.99, image: '/api/placeholder/300/400' },
+        { id: 2, name: 'Recycled Jeans', price: 79.99, image: '/api/placeholder/300/400' },
+        { id: 3, name: 'Organic Cotton Dress', price: 89.99, image: '/api/placeholder/300/400' },
+      ]);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      alert(`An error occurred: ${error.message}`);
+    }
+
     setLoading(false);
   };
 
   return (
-      // {tasks?.map(({ _id, text }) => (
-      //   <div key={_id}>{text}</div>
-      // ))}
     <div className="min-h-screen bg-cover bg-center bg-no-repeat p-8 font-sans" style={{backgroundImage: "url('/hackmnit.jpg')"}}>
       <div className="max-w-4xl mx-auto">
         <h1 className="text-6xl text-center mb-2 text-black tracking-tight font-serif leading-tight transform scale-105 transition-all duration-500 hover:text-gray-800">
@@ -94,54 +113,22 @@ const ChicChat = () => {
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex flex-col items-center space-y-4">
             <div className="w-full">
-              <label htmlFor="image-upload" className="block text-sm font-medium text-indigo-700 mb-2">
-                Upload Images (Max 5)
+              <label htmlFor="link-input" className="block text-sm font-medium text-indigo-700 mb-2">
+                Paste Pintrest link
               </label>
-              <div className="flex items-center justify-center w-full">
-                <label
-                  htmlFor="image-upload"
-                  className="flex flex-col items-center justify-center w-full h-64 border-2 border-indigo-300 border-dashed rounded-lg cursor-pointer bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
-                >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-10 h-10 mb-3 text-indigo-500" />
-                    <p className="mb-2 text-sm text-indigo-500">
-                      <span className="font-semibold">Click to upload</span> or drag and drop
-                    </p>
-                    <p className="text-xs text-indigo-500">PNG, JPG or GIF (MAX. 5 images)</p>
-                  </div>
-                  <input
-                    id="image-upload"
-                    type="file"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                    accept="image/*"
-                    multiple
-                    disabled={images.length >= 5}
-                  />
-                </label>
-              </div>
+              <input
+                id="link-input"
+                type="url"
+                value={link}
+                onChange={(e) => handleLinkChange(e.target.value)}
+                placeholder="Image link"
+                className="w-full p-2 border border-indigo-300 rounded-lg mb-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
             </div>
-            
-            {images.length > 0 && (
-              <div className="flex flex-wrap gap-4 justify-center">
-                {images.map((image, index) => (
-                  <div key={index} className="relative">
-                    <img src={getDataUrl(image)} alt={`Uploaded ${index + 1}`} className="w-24 h-24 object-cover rounded-lg" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors duration-200"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
             
             <button 
               type="submit" 
-              disabled={loading || images.length === 0}
+              disabled={loading || link.trim() === ''}
               className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full py-2 px-5 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex items-center"
             >
               {loading ? (
@@ -150,12 +137,12 @@ const ChicChat = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Uploading...
+                  Processing...
                 </>
               ) : (
                 <>
-                  <Upload className="mr-2" size={18} />
-                  Upload Images
+                  <LinkIcon className="mr-2" size={18} />
+                  Submit Link
                 </>
               )}
             </button>
@@ -180,7 +167,7 @@ const ChicChat = () => {
                 <div className="p-4">
                   <h3 className="font-semibold text-lg mb-2 text-[#4B0082]">{item.name}</h3>
                   <p className="text-sm text-[#9370DB] mb-4">Sustainable Choice</p>
-                  <div className="flex justify-between items-center">
+                  {/* <div className="flex justify-between items-center">
                     <button 
                       onClick={() => handleLike(item.id, true)}
                       className={`p-2 rounded-full transition-colors duration-200 ${likes[item.id] === true ? 'bg-pink-100 text-pink-500' : 'hover:bg-pink-50 text-gray-400'}`}
@@ -193,7 +180,7 @@ const ChicChat = () => {
                     >
                       <HeartCrack size={24} />
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             ))}

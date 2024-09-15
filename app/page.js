@@ -106,7 +106,7 @@ const ChicChat = () => {
                   {
                     type: "image_url",
                     image_url: {
-                      url: pin.ogImage, // Correctly accessing the image URL from each element in allPinImages
+                      url: pin.ogImage,
                     },
                   },
                 ],

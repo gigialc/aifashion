@@ -42,7 +42,7 @@ const ChicChat = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "place your API key here lol", // Replace with your actual API key
+            Authorization: "sk-tune-yzCvXBG9HLSKZtDkBaCAM1PUTtywr66Picy", // Replace with your actual API key
           },
           body: JSON.stringify({
             temperature: 0.9,
@@ -77,7 +77,7 @@ const ChicChat = () => {
                   {
                     type: "image_url",
                     image_url: {
-                      url: pin, // Using the current Pinterest image
+                      url: link, // Using the current Pinterest image
                     },
                   },
                 ],
@@ -145,7 +145,7 @@ const ChicChat = () => {
           <div className="flex flex-col items-center space-y-4">
             <div className="w-full">
               <label htmlFor="link-input" className="block text-sm font-medium text-indigo-700 mb-2">
-                Paste Pinterest link
+                Paste image link
               </label>
               <input
                 id="link-input"

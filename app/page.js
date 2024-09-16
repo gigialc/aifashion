@@ -28,21 +28,20 @@ const ChicChat = () => {
       return;
     }
 
-    const linksToPinImages = [
-      "https://i.pinimg.com/564x/66/c5/2b/66c52bcb458b467fec50806ba466dbdf.jpg",
-      "https://i.pinimg.com/736x/98/09/60/9809609693aea98c987ae6767a071b6f.jpg",
-      "https://i.pinimg.com/564x/a1/bc/26/a1bc26115bf0dc9278a9ce7a36936278.jpg",
-      "https://i.pinimg.com/736x/7a/2f/fb/7a2ffb71ede2705f27bfc0ea9643c8c0.jpg",
-      "https://i.pinimg.com/564x/6c/5f/eb/6c5febe4049c4597d70b1cb286aa9cde.jpg"
-    ];
+    // const linksToPinImages = [
+    //   "https://i.pinimg.com/564x/66/c5/2b/66c52bcb458b467fec50806ba466dbdf.jpg",
+    //   "https://i.pinimg.com/736x/98/09/60/9809609693aea98c987ae6767a071b6f.jpg",
+    //   "https://i.pinimg.com/564x/a1/bc/26/a1bc26115bf0dc9278a9ce7a36936278.jpg",
+    //   "https://i.pinimg.com/736x/7a/2f/fb/7a2ffb71ede2705f27bfc0ea9643c8c0.jpg",
+    //   "https://i.pinimg.com/564x/6c/5f/eb/6c5febe4049c4597d70b1cb286aa9cde.jpg"
+    // ];
 
     try {
-      for (const pin of linksToPinImages) {
         const response = await fetch("https://proxy.tune.app/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "sk-tune-yzCvXBG9HLSKZtDkBaCAM1PUTtywr66Picy", // Replace with your actual API key
+            Authorization: "", // Replace with your actual API key
           },
           body: JSON.stringify({
             temperature: 0.9,
@@ -121,7 +120,7 @@ const ChicChat = () => {
 
         // Set the updated matched items
         setMatchedItems(updatedItems);
-      }
+      
     } catch (error) {
       console.error("Error fetching or processing data:", error);
       alert(`An error occurred: ${error.message}`);
